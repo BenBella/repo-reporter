@@ -45,12 +45,42 @@ enum RepositoryAction: Equatable {
 }
 
 struct RepositoryEnvironment {
+  var repositoryRequest: (JSONDecoder) -> Effect<[RepositoryModel], APIError>
+  var mainQueue: () -> AnySchedulerOf<DispatchQueue>
+  var decoder: () -> JSONDecoder
+  
+  static let dev = RepositoryEnvironment(
+    repositoryRequest: dummyRepositoryEffect,
+    mainQueue: { .main },
+    decoder: { JSONDecoder() })
 }
 
 let repositoryReducer = Reducer<
   RepositoryState,
   RepositoryAction,
   RepositoryEnvironment
-> { _, _, _ in
-  .none
+> { state, action, environment in
+  
+  switch action {
+    case .onAppear:
+      return environment.repositoryRequest(environment.decoder())
+          .receive(on: environment.mainQueue())
+          .catchToEffect()
+          .map(RepositoryAction.dataLoaded)
+  case .dataLoaded(let result):
+      switch result {
+        case .success(let repositories):
+          state.repositories = repositories
+        case .failure(let error):
+          break
+        }
+      return .none
+    case .favoriteButtonTapped(let repository):
+      if state.favoriteRepositories.contains(repository) {
+        state.favoriteRepositories.removeAll { $0 == repository }
+      } else {
+        state.favoriteRepositories.append(repository)
+      }
+      return .none
+  }
 }

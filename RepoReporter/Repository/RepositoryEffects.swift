@@ -33,6 +33,11 @@
 import Foundation
 import ComposableArchitecture
 
+/*
+ The mechanism TCA uses for asynchronous calls is Effect. But these effects cover more than asynchronous calls. They also wrap all non-deterministic method calls inside them. For example, this also includes getting the current date or initializing a new UUID.
+ You can think of Effect as a wrapper around a Combine publisher with some additional helper methods.
+ */
+
 func repositoryEffect(decoder: JSONDecoder) -> Effect<[RepositoryModel], APIError> {
   guard let url = URL(string: "https://api.github.com/users/raywenderlich/repos?sort=updated&per_page=10") else {
     fatalError("Error on creating url")
