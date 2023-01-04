@@ -46,19 +46,12 @@ enum RepositoryAction: Equatable {
 
 struct RepositoryEnvironment {
   var repositoryRequest: (JSONDecoder) -> Effect<[RepositoryModel], APIError>
-  var mainQueue: () -> AnySchedulerOf<DispatchQueue>
-  var decoder: () -> JSONDecoder
-  
-  static let dev = RepositoryEnvironment(
-    repositoryRequest: dummyRepositoryEffect,
-    mainQueue: { .main },
-    decoder: { JSONDecoder() })
 }
 
 let repositoryReducer = Reducer<
   RepositoryState,
   RepositoryAction,
-  RepositoryEnvironment
+  SystemEnvironment<RepositoryEnvironment>
 > { state, action, environment in
   
   switch action {

@@ -34,7 +34,7 @@ import Foundation
 import ComposableArchitecture
 
 func userEffect(decoder: JSONDecoder) -> Effect<UserModel, APIError> {
-  guard let url = URL(string: "https://api.github.com/users/raywenderlich") else {
+  guard let url = URL(string: "https://api.github.com/users/benbella") else {
     fatalError("Error on creating url")
   }
   return URLSession.shared.dataTaskPublisher(for: url)

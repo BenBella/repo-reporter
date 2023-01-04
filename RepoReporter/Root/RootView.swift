@@ -38,13 +38,23 @@ struct RootView: View {
   var body: some View {
     WithViewStore(self.store.stateless) { _ in
       TabView {
-        Color.clear
+        RepositoryListView(
+          /*
+           Scope transforms the global store to a local store, so RepositoryListView can focus on its local state and actions.
+           It has no access to the global state or actions.
+           */
+          store: store.scope(
+            state: \.repositoryState,
+            action: RootAction.repositoryAction))
           .tabItem {
             Image(systemName: "list.bullet")
             Text("Repositories")
           }
 
-        Color.clear
+        FavoritesListView(
+          store: store.scope(
+            state: \.repositoryState,
+            action: RootAction.repositoryAction))
           .tabItem {
             Image(systemName: "heart.fill")
             Text("Favorites")

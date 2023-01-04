@@ -137,6 +137,8 @@ struct RepositoryListView_Previews: PreviewProvider {
       store: Store(
         initialState: RepositoryState(),
         reducer: repositoryReducer,
-        environment: .dev))
+        environment: .dev(
+          environment: RepositoryEnvironment(
+            repositoryRequest: dummyRepositoryEffect))))
   }
 }

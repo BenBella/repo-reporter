@@ -34,13 +34,23 @@ import ComposableArchitecture
 
 struct RootState {
   var userState = UserState()
+  var repositoryState = RepositoryState()
 }
 
 enum RootAction {
   case userAction(UserAction)
+  case repositoryAction(RepositoryAction)
 }
 
 struct RootEnvironment { }
+
+/*
+ Composing Reducers
+ The final step is to add repositoryReducer to rootReducer. Switch back to RootFeature.swift.
+ But how can a reducer working on local state, actions and environment work on the larger, global state, actions and environment? TCA provides two methods to do so:
+ combine: Creates a new reducer by combining many reducers. It executes each given reducer in the order they are listed.
+ pullback: Transforms a given reducer so it can work on global state, actions and environment. It uses three methods, which you need to pass to pullback.
+ */
 
 // swiftlint:disable trailing_closure
 let rootReducer = Reducer<
@@ -51,5 +61,14 @@ let rootReducer = Reducer<
   userReducer.pullback(
     state: \.userState,
     action: /RootAction.userAction,
-    environment: { _ in .live(environment: UserEnvironment(userRequest: userEffect)) }))
+    environment: { _ in .live(environment: UserEnvironment(userRequest: userEffect)) }),
+  // 1 pullback transforms repositoryReducer to work on RootState, RootAction and RootEnvironment.
+  repositoryReducer.pullback(
+    // 2 repositoryReducer works on the local RepositoryState. You use a a key path to plug out the local state from the global RootState.
+    state: \.repositoryState,
+    // 3 a case path makes the local RepositoryAction accessible from the global RootAction. Case paths come with TCA and are like key paths, but work on enumeration cases.
+    action: /RootAction.repositoryAction,
+    // 4
+    environment: { _ in .live(environment: RepositoryEnvironment(repositoryRequest: repositoryEffect)) })
+)
 // swiftlint:enable trailing_closure
